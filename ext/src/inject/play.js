@@ -1,15 +1,24 @@
-var div = document.createElement('speak-easy-mic');
-var mic = new Wit.Microphone(div);
-mic.onready = function() {
-  console.log("Microphone is ready to record.");
+// Secrets and constants we'll use.
+var CLIENT_ID = "4I537542AYSO7HCNF2UL5MOM5NE7MLV5";
+
+// Callback functions for mic actions.
+var handleResults = function(intent, entities) {
+  console.log("We have our things back.");
+  console.log(intent);
+  console.log(entities);
+}
+var onMicReady = function() {
+  console.log("Awe yeah we ready.");
 }
 
-mic.onaudiostart = function() {
-  console.log("Recording started.");
-}
+// Hookup callback functions.
+mic.onready = onMicReady;
+mic.onresult = handleResults;
 
-div.click();
+// Connect our microphone.
+mic.connect(CLIENT_ID);
 
+// Send messages to background.
 chrome.extension.sendMessage({type: 'play'}, function(response) {
     var readyStateCheckInterval = setInterval(function() {
       if (document.readyState === "complete") {
