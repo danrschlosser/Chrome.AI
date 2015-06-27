@@ -1,3 +1,4 @@
+var SERVER_BASE = 'http://d77ac5c6.ngrok.io/'
 var pendingIntents = [];
 
 var sendMessageToActiveTab = function (message) {
@@ -39,10 +40,24 @@ recognition.onresult = function (event) {
     var intentObj = {
         intents: pendingIntents,
         expression: expression,
-        confidence: confidence
+        confidence: confidence,
+        context: null
     };
 
-    log("Server obj:", intentObj);
+    log("Sending obj to server:", intentObj);
+
+    $.ajax({
+        type: 'POST',
+        url: SERVER_BASE + '/train',
+        data: JSON.stringify(intentObj),
+        success: function(data) {
+            log('POST successful:');
+            log(data);
+        },
+        contentType: "application/json",
+        dataType: 'json'
+    });
+
     pendingIntents = [];
 };
 
