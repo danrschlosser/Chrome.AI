@@ -2,6 +2,36 @@
 var CLIENT_ID = "4I537542AYSO7HCNF2UL5MOM5NE7MLV5";
 var isReady = false;
 
+var SERIALIZE_MAP = {
+    '_9470' : '\'',
+    '_9471' : '\"',
+    '_9472' : ' ',
+    '_9473' : '-',
+    '_9474' : '#',
+    '_9475' : '.',
+    '_9476' : ',',
+    '_9477' : ':',
+    '_9478' : '{',
+    '_9479' : '}',
+    '_9480' : '[',
+    '_9481' : ']',
+    '_9482' : '(',
+    '_9483' : ')',
+};
+
+function escapeRegExp(s) {
+    return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
+};
+
+var deserialize = function (str) {
+    for (var key in SERIALIZE_MAP) {
+        var value = SERIALIZE_MAP[key];
+        var regex = new RegExp(escapeRegExp(key), 'g');
+        str = str.replace(regex, value);
+    }
+    return str.slice(3);
+};
+
 // Callback functions for mic actions.
 var handleResults = function(response) {
   // TODO: multiple intents
@@ -9,16 +39,15 @@ var handleResults = function(response) {
   var entities = response.outcomes[0].entities;
   console.log("We have our things back:", intent, entities);
 
-  console.log('do this step eventually');
-  // var intentData = JSON.parse(intent);
-  // switch(intentData.intentType) {
-  //   case 'click':
-  //     $(intentData.selector).click();
-  //     break;
-  //   default:
-  //     console.log('Failed to understand intent with type:', intentData.intentType);
-  //     break;
-  // }
+  var intentData = JSON.parse(deserialize(intent));
+  switch(intentData.intentType) {
+    case 'click':
+      $(intentData.selector).click();
+      break;
+    default:
+      console.log('Failed to understand intent with type:', intentData.intentType);
+      break;
+  }
 };
 
 function sendRequest(query) {

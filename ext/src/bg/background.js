@@ -1,6 +1,5 @@
 var pendingIntents = [];
 var SERVER_BASE = 'http://d77ac5c6.ngrok.io/';
-
 var sendMessageToActiveTab = function (message) {
     chrome.tabs.query({ active: true }, function(tabs) {
         chrome.tabs.sendMessage(tabs[0].id, message, function(response) {
@@ -56,19 +55,22 @@ recognition.onresult = function (event) {
 
         log("Server obj:", intentObj);
 
-        $.ajax({
-            type: 'POST',
-            url: SERVER_BASE + '/train',
-            data: JSON.stringify(intentObj),
-            success: function(data) {
-                log('POST successful:');
-                log(data);
-            },
-            contentType: "application/json",
-            dataType: 'json'
-        });
+        if (pendingIntents.length > 0) {
+            $.ajax({
+                type: 'POST',
+                url: SERVER_BASE + 'train',
+                data: JSON.stringify(intentObj),
+                success: function(data) {
+                    log('POST successful:');
+                    log(data);
+                },
+                contentType: "application/json",
+                dataType: 'json'
+            });
 
-        pendingIntents = [];
+            pendingIntents = [];
+        }
+
     } else if (isPlaying) {
         sendMessageToActiveTab({
             type: 'voice',
@@ -85,11 +87,14 @@ recognition.onerror = function (e) {
     log('error', e);
 };
 
+var isPlaying = false;
+var isRecording = false;
+
 var onRecord = function (e) {
+    isPlaying = false;
     isRecording = !isRecording;
 
     resetIcon();
-
     if (isRecording) {
         log('Start recording');
         recognition.start();
@@ -102,6 +107,21 @@ var onRecord = function (e) {
         chrome.contextMenus.update('record', {
             'title': 'Start Recording'
         });
+    }
+};
+
+var onPlay = function (e) {
+    isRecording = false;
+    isPlaying = !isPlaying;
+
+    resetIcon();
+
+    if (isPlaying) {
+        log('Start playing');
+        recognition.start();
+    } else {
+        log('Stop recording');
+        recognition.stop();
     }
 };
 
@@ -118,8 +138,6 @@ chrome.contextMenus.removeAll(function () {
     });
 });
 
-var isPlaying = false;
-var isRecording = false;
 
 var getLogoRoute = function () {
   var fileName = isPlaying ? "loading.png" : (isRecording ? "recording.png" : "icon16.png");
@@ -134,16 +152,6 @@ var resetIcon = function () {
 
 resetIcon();
 
-chrome.browserAction.onClicked.addListener(function(tabs) {
-    isPlaying = !isPlaying;
-
-    resetIcon();
-
-    if (isPlaying) {
-        log('Start playing');
-        recognition.start();
-    } else {
-        log('Stop recording');
-        recognition.stop();
-    }
+chrome.browserAction.onClicked.addListener(function(e) {
+    onPlay(e);
 });
