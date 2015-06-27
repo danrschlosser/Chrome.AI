@@ -10,10 +10,22 @@ var handleResults = function(intent, entities) {
 var onMicReady = function() {
   console.log("Awe yeah we ready.");
 }
+var onStartRecording = function() {
+  console.log("We've started recording.");
+  // TODO: Add interface actions.
+}
+var onStopRecording = function() {
+  console.log("We've stopped recording.");
+  // TODO: Add interface actions.
+}
+
+var mic = new Wit.Microphone();
 
 // Hookup callback functions.
 mic.onready = onMicReady;
 mic.onresult = handleResults;
+mic.onaudiostart = onStartRecording;
+mic.onaudioend = onStopRecording;
 
 // Connect our microphone.
 mic.connect(CLIENT_ID);
@@ -30,9 +42,11 @@ chrome.extension.sendMessage({type: 'play'}, function(response) {
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.type === 'start-play') {
-            console.log("starting play");
+          debugger;
+          mic.start();
         } else if (request.type === 'stop-play') {
-            console.log("stopping playing");
+          debugger;
+          mic.stop();
         }
     }
 );
