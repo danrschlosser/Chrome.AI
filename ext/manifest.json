@@ -36,6 +36,8 @@
         "src/inject/inject.css"
       ],
       "js": [
+        "js/jquery/jquery.min.js",
+        "src/inject/microphone/microphone.min.js",
         "src/inject/record.js",
         "src/inject/play.js"
       ]

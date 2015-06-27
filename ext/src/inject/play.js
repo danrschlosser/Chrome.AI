@@ -1,13 +1,19 @@
+var div = document.createElement('speak-easy-mic');
+var mic = new Wit.Microphone(div);
+mic.onready = function() {
+  console.log("Microphone is ready to record.");
+}
+
+mic.onaudiostart = function() {
+  console.log("Recording started.");
+}
+
+div.click();
+
 chrome.extension.sendMessage({type: 'play'}, function(response) {
     var readyStateCheckInterval = setInterval(function() {
-    if (document.readyState === "complete") {
-        clearInterval(readyStateCheckInterval);
-
-        // ----------------------------------------------------------
-        // This part of the script triggers when page is done loading
-        console.log("Hello. This message was sent from scripts/play.js");
-        // ----------------------------------------------------------
-
-    }
+      if (document.readyState === "complete") {
+          clearInterval(readyStateCheckInterval);
+      }
     }, 10);
 });
