@@ -1,5 +1,7 @@
-// Secrets and constants we'll use.
+// Secrets, constants, and global variables.
 var CLIENT_ID = "4I537542AYSO7HCNF2UL5MOM5NE7MLV5";
+var mic = new Wit.Microphone();
+var isReady = false;
 
 // Callback functions for mic actions.
 var handleResults = function(intent, entities) {
@@ -15,18 +17,14 @@ var handleResults = function(intent, entities) {
   }
 }
 var onMicReady = function() {
-  console.log("Awe yeah we ready.");
+  isReady = true;
 }
 var onStartRecording = function() {
-  console.log("We've started recording.");
   // TODO: Add interface actions.
 }
 var onStopRecording = function() {
-  console.log("We've stopped recording.");
   // TODO: Add interface actions.
 }
-
-var mic = new Wit.Microphone();
 
 // Hookup callback functions.
 mic.onready = onMicReady;
@@ -46,13 +44,12 @@ chrome.extension.sendMessage({type: 'play'}, function(response) {
     }, 10);
 });
 
+// Receive messages from the background.
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.type === 'start-play') {
-          debugger;
           mic.start();
         } else if (request.type === 'stop-play') {
-          debugger;
           mic.stop();
         }
     }
