@@ -3,9 +3,16 @@ var CLIENT_ID = "4I537542AYSO7HCNF2UL5MOM5NE7MLV5";
 
 // Callback functions for mic actions.
 var handleResults = function(intent, entities) {
-  console.log("We have our things back.");
-  console.log(intent);
-  console.log(entities);
+  console.log("We have our things back:", intent, entities);
+  var intentData = JSON.parse(intent);
+  switch(intentData.intentType) {
+    case 'click':
+      $(intentData.selector).click();
+      break;
+    default:
+      console.log('Failed to understand intent with type:', intentData.intentType);
+      break;
+  }
 }
 var onMicReady = function() {
   console.log("Awe yeah we ready.");
