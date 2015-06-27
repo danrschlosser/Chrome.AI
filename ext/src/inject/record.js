@@ -1,5 +1,4 @@
 $('a, button, input, select, textarea').click(function(e) {
-	console.log(e);
 	chrome.extension.sendMessage({
 		type: 'record',
 		intent: {
@@ -10,16 +9,6 @@ $('a, button, input, select, textarea').click(function(e) {
 			}
 		}
 	}, function(response) {
-		var readyStateCheckInterval = setInterval(function() {
-			if (document.readyState === "complete") {
-				clearInterval(readyStateCheckInterval);
-
-				// ----------------------------------------------------------
-				// This part of the script triggers when page is done loading
-				console.log("Hello. This message was sent from scripts/record.js");
-				// ----------------------------------------------------------
-
-			}
-		}, 10);
+		// After background.js response
 	});
 });
