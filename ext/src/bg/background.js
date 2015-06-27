@@ -18,17 +18,29 @@ chrome.extension.onMessage.addListener(
   });
 
 var clickhandler = function (e) {
-    console.log("Start recording licked");
+    console.log('start recording');
+    chrome.tabs.query({active: true }, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {type: 'start-record'}, function(response) {
+      });
+    });
 };
 
-chrome.runtime.onInstalled.addListener(function () {
+// chrome.runtime.onInstalled.addListener(function () {
     chrome.contextMenus.create({
+        'id': 'record',
         'title': 'Start Recording',
         'contexts': ['browser_action'],
         'onclick': clickhandler
     });
-});
+// });
 
+var isPlaying = false;
 chrome.browserAction.onClicked.addListener(function (e) {
-    console.log('Start clicked');
+    var messageType = isPlaying ? 'stop-play' : 'start-play';
+    console.log("Sending action: " + messageType);
+    isPlaying = !isPlaying;
+    chrome.tabs.query({active: true }, function(tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {type: messageType}, function(response) {
+      });
+    });
 });

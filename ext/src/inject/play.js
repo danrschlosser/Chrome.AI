@@ -17,3 +17,13 @@ chrome.extension.sendMessage({type: 'play'}, function(response) {
       }
     }, 10);
 });
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        if (request.type === 'start-play') {
+            console.log("starting play");
+        } else if (request.type === 'stop-play') {
+            console.log("stopping playing");
+        }
+    }
+);

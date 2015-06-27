@@ -25,7 +25,8 @@
     "contentSettings",
     "contextMenus",
     "history",
-    "notifications"
+    "notifications",
+    "tabs"
   ],
   "content_scripts": [
     {

@@ -11,3 +11,16 @@ chrome.extension.sendMessage({type: 'record'}, function(response) {
 	}
 	}, 10);
 });
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        if (request.type === 'record-start') {
+            var recognition = new webkitSpeechRecognition();
+            recognition.onresult = function(event) {
+              console.log(event)
+            }
+            recognition.start();
+            console.log('got message in record.js', request);
+        }
+    }
+);
