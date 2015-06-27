@@ -18,6 +18,8 @@ var handleResults = function(intent, entities) {
 }
 var onMicReady = function() {
   isReady = true;
+
+  mic.start();
 }
 var onStartRecording = function() {
   console.log('We have started recording');
@@ -34,25 +36,18 @@ mic.onresult = handleResults;
 mic.onaudiostart = onStartRecording;
 mic.onaudioend = onStopRecording;
 
-// Connect our microphone.
-mic.connect(CLIENT_ID);
-
-// Send messages to background.
-chrome.extension.sendMessage({type: 'play'}, function(response) {
-    var readyStateCheckInterval = setInterval(function() {
-      if (document.readyState === "complete") {
-          clearInterval(readyStateCheckInterval);
-      }
-    }, 10);
-});
-
 // Receive messages from the background.
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.type === 'start-play') {
-          mic.start();
+          // Connect our microphone.
+          mic.connect(CLIENT_ID);
         } else if (request.type === 'stop-play') {
           mic.stop();
+        } else if (request.type === 'log') {
+          console.log.call(console, request.data);
+        } else if (request.type === 'voice') {
+          console.log('got voice', request.data);
         }
     }
 );

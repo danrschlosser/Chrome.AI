@@ -1,19 +1,32 @@
 var pendingIntents = [];
 
+var sendMessageToActiveTab = function (message) {
+    chrome.tabs.query({ active: true }, function(tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, message, function(response) {
+        });
+    });
+};
+
+var log = function () {
+    console.log.apply(console, arguments);
+    sendMessageToActiveTab({
+        type: 'log',
+        data: arguments
+    });
+};
+
 //example of using a message handler from the inject scripts
 chrome.extension.onMessage.addListener(
   function(request, sender, sendResponse) {
-    console.log(request);
+    log(request);
     if (request.type === 'record') {
-        console.log('message from record');
+        log('message from record');
         pendingIntents.push(request.intent);
     } else if (request.type === 'play') {
-        console.log('message from play');
+        log('message from play');
     }
     sendResponse();
   });
-
-chrome.tabs.create({url: 'src/bg/background.html' });
 
 var isRecording = false;
 var clickhandler = function (e) {
@@ -21,7 +34,7 @@ var clickhandler = function (e) {
 
     var recognition = new webkitSpeechRecognition();
     recognition.onresult = function (event) {
-        console.log('heard some voice', event);
+        log('heard some voice', event);
         var expression = event.results[0][0].transcript;
         var confidence = event.results[0][0].confidence;
 
@@ -31,17 +44,17 @@ var clickhandler = function (e) {
             confidence: confidence
         };
 
-        console.log("Server obj:", intentObj);
+        log("Server obj:", intentObj);
         pendingIntents = [];
     };
 
     recognition.onend = function (e) {
         recognition.start();
-        console.log('onend event', e);
+        log('onend event', e);
     };
 
     recognition.onerror = function (e) {
-        console.log('error', e);
+        log('error', e);
     };
 
     if (isRecording) {
@@ -56,6 +69,10 @@ var clickhandler = function (e) {
         });
     }
 };
+
+chrome.runtime.onInstalled.addListener(function () {
+    chrome.tabs.create({url: 'src/bg/permissions.html' });
+});
 
 chrome.contextMenus.removeAll(function () {
     chrome.contextMenus.create({
@@ -75,7 +92,6 @@ function getLogoRoute() {
 }
 
 chrome.browserAction.onClicked.addListener(function(tabs) {
-    var messageType = isPlaying ? 'stop-play' : 'start-play';
     isPlaying = !isPlaying;
 
     var newLogo = getLogoRoute();
@@ -83,8 +99,29 @@ chrome.browserAction.onClicked.addListener(function(tabs) {
       path: getLogoRoute()
     });
 
-    chrome.tabs.query({ active: true }, function(tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, {type: messageType}, function(response) {
-      });
-    });
+    var playRecognition = new webkitSpeechRecognition();
+    playRecognition.onresult = function (event) {
+        log('heard some voice', event);
+        var expression = event.results[0][0].transcript;
+
+        sendMessageToActiveTab({
+            type: 'voice',
+            data: expression
+        });
+    };
+
+    playRecognition.onend = function (e) {
+        playRecognition.start();
+        log('onend event', e);
+    };
+
+    playRecognition.onerror = function (e) {
+        log('error', e);
+    };
+
+    if (isPlaying) {
+        playRecognition.start();
+    } else {
+        playRecognition.stop();
+    }
 });
