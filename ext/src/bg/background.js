@@ -1,10 +1,3 @@
-// if you checked "fancy-settings" in extensionizr.com, uncomment this lines
-
-// var settings = new Store("settings", {
-//     "sample_setting": "This is how you use Store.js to remember values"
-// });
-
-
 //example of using a message handler from the inject scripts
 chrome.extension.onMessage.addListener(
   function(request, sender, sendResponse) {
@@ -35,10 +28,20 @@ var clickhandler = function (e) {
 // });
 
 var isPlaying = false;
-chrome.browserAction.onClicked.addListener(function (e) {
+var isRecording = false;
+
+function getLogoRoute() {
+  var fileName = isPlaying ? "loading.png" : (isRecording ? "recording.png" : "icon16.png");
+  return "icons/" + fileName;
+}
+
+chrome.browserAction.onClicked.addListener(function(tabs) {
     var messageType = isPlaying ? 'stop-play' : 'start-play';
-    console.log("Sending action: " + messageType);
     isPlaying = !isPlaying;
+    var newLogo = getLogoRoute();
+    chrome.browserAction.setIcon({
+      path: getLogoRoute()
+    });
     chrome.tabs.query({active: true }, function(tabs) {
       chrome.tabs.sendMessage(tabs[0].id, {type: messageType}, function(response) {
       });

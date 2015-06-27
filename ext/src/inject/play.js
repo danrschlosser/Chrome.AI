@@ -20,9 +20,11 @@ var onMicReady = function() {
   isReady = true;
 }
 var onStartRecording = function() {
-  // TODO: Add interface actions.
+  console.log('We have started recording');
+  chrome.extension.sendMessage({type: 'record-logo'}, null);
 }
 var onStopRecording = function() {
+  console.log('We have ended recording.');
   // TODO: Add interface actions.
 }
 
