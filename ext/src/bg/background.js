@@ -29,33 +29,35 @@ chrome.extension.onMessage.addListener(
   });
 
 var isRecording = false;
+
+var recognition = new webkitSpeechRecognition();
+recognition.onresult = function (event) {
+    log('heard some voice', event);
+    var expression = event.results[0][0].transcript;
+    var confidence = event.results[0][0].confidence;
+
+    var intentObj = {
+        intents: pendingIntents,
+        expression: expression,
+        confidence: confidence
+    };
+
+    log("Server obj:", intentObj);
+    pendingIntents = [];
+};
+
+recognition.onend = function (e) {
+    recognition.start();
+    log('onend event', e);
+};
+
+recognition.onerror = function (e) {
+    log('error', e);
+};
+
 var clickhandler = function (e) {
     isRecording = !isRecording;
 
-    var recognition = new webkitSpeechRecognition();
-    recognition.onresult = function (event) {
-        log('heard some voice', event);
-        var expression = event.results[0][0].transcript;
-        var confidence = event.results[0][0].confidence;
-
-        var intentObj = {
-            intents: pendingIntents,
-            expression: expression,
-            confidence: confidence
-        };
-
-        log("Server obj:", intentObj);
-        pendingIntents = [];
-    };
-
-    recognition.onend = function (e) {
-        recognition.start();
-        log('onend event', e);
-    };
-
-    recognition.onerror = function (e) {
-        log('error', e);
-    };
 
     if (isRecording) {
         recognition.start();
@@ -91,6 +93,26 @@ function getLogoRoute() {
   return "icons/" + fileName;
 }
 
+var playRecognition = new webkitSpeechRecognition();
+playRecognition.onresult = function (event) {
+    log('heard some voice', event);
+    var expression = event.results[0][0].transcript;
+
+    sendMessageToActiveTab({
+        type: 'voice',
+        data: expression
+    });
+};
+
+playRecognition.onend = function (e) {
+    playRecognition.start();
+    log('onend event', e);
+};
+
+playRecognition.onerror = function (e) {
+    log('error', e);
+};
+
 chrome.browserAction.onClicked.addListener(function(tabs) {
     isPlaying = !isPlaying;
 
@@ -99,25 +121,6 @@ chrome.browserAction.onClicked.addListener(function(tabs) {
       path: getLogoRoute()
     });
 
-    var playRecognition = new webkitSpeechRecognition();
-    playRecognition.onresult = function (event) {
-        log('heard some voice', event);
-        var expression = event.results[0][0].transcript;
-
-        sendMessageToActiveTab({
-            type: 'voice',
-            data: expression
-        });
-    };
-
-    playRecognition.onend = function (e) {
-        playRecognition.start();
-        log('onend event', e);
-    };
-
-    playRecognition.onerror = function (e) {
-        log('error', e);
-    };
 
     if (isPlaying) {
         playRecognition.start();
