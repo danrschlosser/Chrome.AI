@@ -1,5 +1,5 @@
-var SERVER_BASE = 'http://d77ac5c6.ngrok.io/'
 var pendingIntents = [];
+var SERVER_BASE = 'http://d77ac5c6.ngrok.io/';
 
 var sendMessageToActiveTab = function (message) {
     chrome.tabs.query({ active: true }, function(tabs) {
@@ -9,7 +9,16 @@ var sendMessageToActiveTab = function (message) {
 };
 
 var log = function () {
-    console.log.apply(console, arguments);
+    var allArgumentsOfTypeString = true;
+    for (var i = 0; i < arguments.length; i++)
+      if (typeof arguments[i] !== "string")
+        allArgumentsOfTypeString = false;
+
+    if (allArgumentsOfTypeString)
+      console.log.apply(console, [Array.prototype.join.call(arguments, " ")]);
+    else
+      console.log.apply(console, arguments);
+
     sendMessageToActiveTab({
         type: 'log',
         data: arguments
@@ -33,53 +42,62 @@ var isRecording = false;
 
 var recognition = new webkitSpeechRecognition();
 recognition.onresult = function (event) {
-    log('heard some voice', event);
     var expression = event.results[0][0].transcript;
     var confidence = event.results[0][0].confidence;
 
-    var intentObj = {
-        intents: pendingIntents,
-        expression: expression,
-        confidence: confidence,
-        context: null
-    };
+    console.log('got expression', expression);
 
-    log("Sending obj to server:", intentObj);
+    if (isRecording) {
+        var intentObj = {
+            intents: pendingIntents,
+            expression: expression,
+            confidence: confidence
+        };
 
-    $.ajax({
-        type: 'POST',
-        url: SERVER_BASE + '/train',
-        data: JSON.stringify(intentObj),
-        success: function(data) {
-            log('POST successful:');
-            log(data);
-        },
-        contentType: "application/json",
-        dataType: 'json'
-    });
+        log("Server obj:", intentObj);
 
-    pendingIntents = [];
+        $.ajax({
+            type: 'POST',
+            url: SERVER_BASE + '/train',
+            data: JSON.stringify(intentObj),
+            success: function(data) {
+                log('POST successful:');
+                log(data);
+            },
+            contentType: "application/json",
+            dataType: 'json'
+        });
+
+        pendingIntents = [];
+    } else if (isPlaying) {
+        sendMessageToActiveTab({
+            type: 'voice',
+            data: expression
+        });
+    }
 };
 
 recognition.onend = function (e) {
     recognition.start();
-    log('onend event', e);
 };
 
 recognition.onerror = function (e) {
     log('error', e);
 };
 
-var clickhandler = function (e) {
+var onRecord = function (e) {
     isRecording = !isRecording;
 
+    resetIcon();
 
     if (isRecording) {
+        log('Start recording');
         recognition.start();
         chrome.contextMenus.update('record', {
             'title': 'Stop Recording'
         });
     } else {
+        log('Stop recording');
         recognition.stop();
         chrome.contextMenus.update('record', {
             'title': 'Start Recording'
@@ -96,50 +114,36 @@ chrome.contextMenus.removeAll(function () {
         'id': 'record',
         'title': 'Start Recording',
         'contexts': ['browser_action'],
-        'onclick': clickhandler
+        'onclick': onRecord
     });
 });
 
 var isPlaying = false;
 var isRecording = false;
 
-function getLogoRoute() {
+var getLogoRoute = function () {
   var fileName = isPlaying ? "loading.png" : (isRecording ? "recording.png" : "icon16.png");
   return "icons/" + fileName;
 }
 
-var playRecognition = new webkitSpeechRecognition();
-playRecognition.onresult = function (event) {
-    log('heard some voice', event);
-    var expression = event.results[0][0].transcript;
-
-    sendMessageToActiveTab({
-        type: 'voice',
-        data: expression
+var resetIcon = function () {
+    chrome.browserAction.setIcon({
+      path: getLogoRoute()
     });
 };
 
-playRecognition.onend = function (e) {
-    playRecognition.start();
-    log('onend event', e);
-};
-
-playRecognition.onerror = function (e) {
-    log('error', e);
-};
+resetIcon();
 
 chrome.browserAction.onClicked.addListener(function(tabs) {
     isPlaying = !isPlaying;
 
-    var newLogo = getLogoRoute();
-    chrome.browserAction.setIcon({
-      path: getLogoRoute()
-    });
-
+    resetIcon();
 
     if (isPlaying) {
-        playRecognition.start();
+        log('Start playing');
+        recognition.start();
     } else {
-        playRecognition.stop();
+        log('Stop recording');
+        recognition.stop();
     }
 });
