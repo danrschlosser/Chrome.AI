@@ -1,9 +1,9 @@
 {
-  "name": "CHANGE THIS : Extension boilerplate",
+  "name": "Chrome.AI: Crowdsourcing a voice-controlled web",
   "version": "0.0.1",
   "manifest_version": 2,
-  "description": "This extension was created with the awesome extensionizr.com",
-  "homepage_url": "http://extensionizr.com",
+  "description": "Train and playback voice-control actions acros many different websites.",
+  "homepage_url": "https://github.com/danrschlosser/Chrome.AI",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",

@@ -251,7 +251,7 @@ chrome.contextMenus.removeAll(function () {
 
 
 var getLogoRoute = function () {
-  var fileName = isPlaying ? "loading.png" : (isRecording ? "recording.png" : "icon16.png");
+  var fileName = isPlaying ? "loading.png" : (isRecording ? "recording.png" : "icon48.png");
   return "icons/" + fileName;
 }
 
