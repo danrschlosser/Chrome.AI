@@ -7,6 +7,12 @@ var runAction = function(action) {
       case 'click':
         $(action.data.selector)[0].click();
         break;
+      case 'submit':
+        action.data.inputs.forEach(function(input) {
+          $(input.selector).val(input.value);
+        });
+        $(action.data.selector).submit();
+        break;
       default:
         console.log('Failed to understand intent with type:', action.intentType);
         break;

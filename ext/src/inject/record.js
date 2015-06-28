@@ -48,21 +48,38 @@ $('a, button, input, select, textarea').click(function(e) {
 	});
 });
 
-// Catch typing
-$('input, select, textarea').change(function(e) {
-	console.log($(this), "changed:", e);
-	var message = {
+// Catch form submissions
+$('form').submit(function(e) {
+	console.log($(this), "was submitted:", e);
+	var $form = $(this);
+	var inputs = [];
+	$form.forEach(function(input) {
+		if (!input.type || input.type != 'submit') {
+			var selector = $form.getSelector(); + " " + input.tagName
+
+			if (input.type) {
+				selector += '[type="' + input.type + '""]';
+			}
+			if (input.name) {
+				selector += '[name="' + input.name + '"]';
+			}
+
+			inputs.push({
+				selector: selector,
+				value: input.value
+			});
+		}
+	});
+	chrome.extension.sendMessage({
 		type: 'record',
 		intent: {
-			intentType: 'input',
+			intentType: 'submit',
 			data: {
-				selector: $(this).getSelector(),
-				value: $(this).val()
+				selector: $form.getSelector(),
+				inputs: inputs
 			}
 		}
-	};
-	console.log(message);
-	chrome.extension.sendMessage(message, function(response) {
+	}, function(response) {
 		// After background.js reponds
 	});
 });
