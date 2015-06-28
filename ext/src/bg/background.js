@@ -142,8 +142,7 @@ recognition.onresult = function (event) {
               'context': {
                  state: [ host ]
                },
-              'access_token': CLIENT_ID,
-              'n': 3
+              'access_token': CLIENT_ID
             };
 
             var handleResults = function(response) {
@@ -158,7 +157,22 @@ recognition.onresult = function (event) {
                 log("Couldn't understand data");
                 return;
               }
-              intentData = intentData.concat(JSON.parse(deserialize(intent)).data);
+
+              var intent = JSON.parse(deserialize(intent)).data;
+              var deserializedEntities = [];
+
+              for (var key in entities) {
+                deserializedEntities.push( {
+                    selector: JSON.parse(deserialize(key)).data,
+                    value: entities[key][0].value
+                });
+              }
+
+              intentData = intentData.concat({
+                intent: intent[0],
+                entities: deserializedEntities
+              });
+
               log("We have our things back:", intentData, entities);
             };
 

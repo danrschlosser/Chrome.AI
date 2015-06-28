@@ -3,19 +3,32 @@ var isReady = false;
 
 // Callback functions for mic actions.
 var runAction = function(action) {
-    switch(action.intentType) {
+  var intent = action.intent;
+  var entities = action.entities;
+
+    switch(intent.intentType) {
       case 'click':
-        $(action.data.selector)[0].click();
+        $(intent.data.selector)[0].click();
         break;
       case 'submit':
-        action.data.inputs.forEach(function(input) {
+        intent.data.inputs.forEach(function(input) {
           $(input.selector)[0].value = input.value;
           // $(input.selector).textContent = input.value;
         });
-        $(action.data.selector + ' button[type="submit"]').click();
+
+        entities.forEach(function (entity) {
+          $(entity.selector)[0].value = entity.value;
+        });
+
+        setTimeout(function () {
+          var elems = $(intent.data.selector + ' input[type="submit"]');
+          for (var i = 0; i < elems.length; i++) {
+            elems[i].click();
+          }
+        }, 500);
         break;
       default:
-        console.log('Failed to understand intent with type:', action.intentType);
+        console.log('Failed to understand intent with type:', intent.intentType);
         break;
     }
 };
