@@ -35,9 +35,9 @@ $('a, button, input, select, textarea').click(function(e) {
 				selector: path,
 				innerText: e.target.innerText
 			},
-			context: {
-				domain: window.location.host
-			}
+			state: [
+				window.location.host
+			]
 		}
 	}, function(response) {
 		// After background.js responds

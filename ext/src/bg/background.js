@@ -53,7 +53,7 @@ recognition.onresult = function (event) {
                 intents: pendingIntents,
                 expression: expression,
                 confidence: confidence,
-                context: pendingIntents[0].context
+                state: pendingIntents[0].state
             };
 
             log("Server obj:", intentObj);
