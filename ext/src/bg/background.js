@@ -1,6 +1,6 @@
 var pendingIntents = [];
-// var SERVER_BASE = 'http://127.0.0.1:8000/';
-var SERVER_BASE = 'http://6089404e.ngrok.io/';
+var SERVER_BASE = 'http://127.0.0.1:8000/';
+// var SERVER_BASE = 'http://6089404e.ngrok.io/';
 var CLIENT_ID = "4I537542AYSO7HCNF2UL5MOM5NE7MLV5";
 
 var sendMessageToActiveTab = function (message, response) {
@@ -142,7 +142,8 @@ recognition.onresult = function (event) {
               'context': {
                  state: [ host ]
                },
-              'access_token': CLIENT_ID
+              'access_token': CLIENT_ID,
+              'n': 3
             };
 
             var handleResults = function(response) {
