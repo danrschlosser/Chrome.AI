@@ -70,7 +70,10 @@ $('form').submit(function(e) {
 		type: 'record',
 		intent: {
 			intentType: 'submit',
-			data: inputs
+			data: {
+				selector: $form.getSelector(),
+				inputs: inputs
+			}
 		}
 	}, function(response) {
 		// After background.js reponds
