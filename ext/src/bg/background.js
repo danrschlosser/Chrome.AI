@@ -47,15 +47,15 @@ recognition.onresult = function (event) {
     console.log('got expression', expression);
 
     if (isRecording) {
-        var intentObj = {
-            intents: pendingIntents,
-            expression: expression,
-            confidence: confidence
-        };
-
         log("Server obj:", intentObj);
 
-        if (pendingIntents.length > 0) {
+        if (pendingIntents.length > 0 && expression && expression !== '') {
+            var intentObj = {
+                intents: pendingIntents,
+                expression: expression,
+                confidence: confidence
+            };
+
             $.ajax({
                 type: 'POST',
                 url: SERVER_BASE + 'train',
