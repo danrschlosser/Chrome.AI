@@ -9,9 +9,10 @@ var runAction = function(action) {
         break;
       case 'submit':
         action.data.inputs.forEach(function(input) {
-          $(input.selector).val(input.value);
+          $(input.selector)[0].value = input.value;
+          // $(input.selector).textContent = input.value;
         });
-        $(action.data.selector).submit();
+        $(action.data.selector + ' button[type="submit"]').click();
         break;
       default:
         console.log('Failed to understand intent with type:', action.intentType);
