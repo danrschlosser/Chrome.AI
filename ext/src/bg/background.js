@@ -147,16 +147,21 @@ recognition.onresult = function (event) {
 
             var handleResults = function(response) {
               if (response.outcomes.length === 0) {
-                console.log('No result for query data:', queryData);
+                log('No result for query', queryData);
                 return;
               }
               // TODO: multiple intents
               var intent = response.outcomes[0].intent;
               var entities = response.outcomes[0].entities;
+              if (intent === 'UNKNOWN') {
+                log("Couldn't understand data");
+                return;
+              }
               intentData = intentData.concat(JSON.parse(deserialize(intent)).data);
-              console.log("We have our things back:", intentData, entities);
+              log("We have our things back:", intentData, entities);
             };
 
+            log('New query:', queryData);
             $.ajax({
                 url: 'https://api.wit.ai/message',
                 data: queryData,
