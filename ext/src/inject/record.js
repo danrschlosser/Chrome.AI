@@ -1,9 +1,13 @@
+function stripQueryStringAndHashFromPath(url) {
+  return url.split("?")[0].split("#")[0];
+}
+
 // Add the ability to get the unique selector of an element
 jQuery.fn.getSelector = function () {
     if (this.length != 1) throw 'Requires one element.';
     var path, node = this;
     if (node[0].id) return '#' + node[0].id;
-    var href = node.attr('href');
+    var href = stripQueryStringAndHashFromPath(node.attr('href'));
     if (href && href != '#') return node[0].tagName + '[href*="' + href + '"]';
     while (node.length) {
         var realNode = node[0], name = realNode.localName;

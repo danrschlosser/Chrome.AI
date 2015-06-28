@@ -1,4 +1,5 @@
 var pendingIntents = [];
+// var SERVER_BASE = 'http://127.0.0.1:8000/';
 var SERVER_BASE = 'http://6089404e.ngrok.io/';
 var CLIENT_ID = "4I537542AYSO7HCNF2UL5MOM5NE7MLV5";
 
@@ -136,7 +137,6 @@ recognition.onresult = function (event) {
 
         sendMessageToActiveTab({ type: 'get-host' }, function (host) {
             // Callback functions for mic actions.
-            debugger;
             var queryData = {
               'q': expression,
               'context': {
@@ -173,6 +173,7 @@ recognition.onend = function (e) {
 };
 
 recognition.onerror = function (e) {
+    pendingIntents = [];
     log('error', e);
 };
 
