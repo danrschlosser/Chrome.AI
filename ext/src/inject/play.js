@@ -50,15 +50,17 @@ var handleResults = function(response) {
   var intent = response.outcomes[0].intent;
   var entities = response.outcomes[0].entities;
   console.log("We have our things back:", intent, entities);
-  var intentData = JSON.parse(deserialize(intent));
-  switch(intentData.intentType) {
-    case 'click':
-      $(intentData.data.selector)[0].click();
-      break;
-    default:
-      console.log('Failed to understand intent with type:', intentData.intentType);
-      break;
-  }
+  var intentData = JSON.parse(deserialize(intent))['data'];
+  intentData.forEach(function(action) {
+    switch(action.intentType) {
+      case 'click':
+        $(action.data.selector)[0].click();
+        break;
+      default:
+        console.log('Failed to understand intent with type:', intentData.intentType);
+        break;
+    }
+  })
 };
 
 function sendRequest(query) {
