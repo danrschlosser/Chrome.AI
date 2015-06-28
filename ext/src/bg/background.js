@@ -1,10 +1,53 @@
 var pendingIntents = [];
-var SERVER_BASE = 'http://d77ac5c6.ngrok.io/';
-var sendMessageToActiveTab = function (message) {
+var SERVER_BASE = 'http://6089404e.ngrok.io/';
+var CLIENT_ID = "4I537542AYSO7HCNF2UL5MOM5NE7MLV5";
+
+var sendMessageToActiveTab = function (message, response) {
     chrome.tabs.query({ active: true }, function(tabs) {
-        chrome.tabs.sendMessage(tabs[0].id, message, function(response) {
-        });
+        chrome.tabs.sendMessage(tabs[0].id, message, response);
     });
+};
+
+var SERIALIZE_MAP = {
+    '_9470' : '\'',
+    '_9471' : '\"',
+    '_9472' : ' ',
+    '_9473' : '-',
+    '_9474' : '#',
+    '_9475' : '.',
+    '_9476' : ',',
+    '_9477' : ':',
+    '_9478' : '{',
+    '_9479' : '}',
+    '_9480' : '[',
+    '_9481' : ']',
+    '_9482' : '(',
+    '_9483' : ')',
+    '_9484' : '<',
+    '_9485' : '>',
+    '_9486' : '/',
+    '_9487' : '\\',
+    '_9488' : '$',
+    '_9489' : '@',
+    '_9490' : '!',
+    '_9491' : '=',
+    '_9492' : '+',
+    '_9493' : '*',
+    '_9494' : '?',
+    '_9495' : '~',
+};
+
+function escapeRegExp(s) {
+    return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
+};
+
+var deserialize = function (str) {
+    for (var key in SERIALIZE_MAP) {
+        var value = SERIALIZE_MAP[key];
+        var regex = new RegExp(escapeRegExp(key), 'g');
+        str = str.replace(regex, value);
+    }
+    return str.slice(3);
 };
 
 var log = function () {
@@ -38,6 +81,22 @@ chrome.extension.onMessage.addListener(
   });
 
 var isRecording = false;
+
+var intentData = [];
+
+function runNext() {
+    var intent = intentData.shift();
+
+    if (intent) {
+
+      sendMessageToActiveTab({
+        type: 'run-action',
+        data: intent
+      });
+    }
+    setTimeout(runNext, 1000);
+ }
+ runNext();
 
 var recognition = new webkitSpeechRecognition();
 recognition.onresult = function (event) {
@@ -74,9 +133,37 @@ recognition.onresult = function (event) {
         }
 
     } else if (isPlaying) {
-        sendMessageToActiveTab({
-            type: 'voice',
-            data: expression
+
+        sendMessageToActiveTab({ type: 'get-host' }, function (host) {
+            // Callback functions for mic actions.
+            debugger;
+            var queryData = {
+              'q': expression,
+              'context': {
+                 state: [ host ]
+               },
+              'access_token': CLIENT_ID
+            };
+
+            var handleResults = function(response) {
+              if (response.outcomes.length === 0) {
+                console.log('No result for query data:', queryData);
+                return;
+              }
+              // TODO: multiple intents
+              var intent = response.outcomes[0].intent;
+              var entities = response.outcomes[0].entities;
+              intentData = intentData.concat(JSON.parse(deserialize(intent)).data);
+              console.log("We have our things back:", intentData, entities);
+            };
+
+            $.ajax({
+                url: 'https://api.wit.ai/message',
+                data: queryData,
+                dataType: 'json',
+                method: 'GET',
+                success: handleResults
+            });
         });
     }
 };
