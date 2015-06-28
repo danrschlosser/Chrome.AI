@@ -49,18 +49,33 @@ var handleResults = function(response) {
   // TODO: multiple intents
   var intent = response.outcomes[0].intent;
   var entities = response.outcomes[0].entities;
-  console.log("We have our things back:", intent, entities);
-  var intentData = JSON.parse(deserialize(intent))['data'];
+  var intentData = JSON.parse(deserialize(intent)).data;
+  console.log("We have our things back:", intentData, entities);
+  var funcs = [];
   intentData.forEach(function(action) {
     switch(action.intentType) {
       case 'click':
-        $(action.data.selector)[0].click();
+        // funcs.push(function () {
+            $(action.data.selector)[0].click();
+        // });
         break;
       default:
         console.log('Failed to understand intent with type:', intentData.intentType);
         break;
     }
-  })
+  });
+
+  // var timeout = 0;
+  // debugger;
+  // function runNext() {
+  //     func = funcs.shift();
+  //     if (! func) {
+  //       return;
+  //     }
+  //     func();
+  //     setTimeout(runNext, 1000);
+  // }
+  // runNext();
 };
 
 function sendRequest(query) {
@@ -80,7 +95,7 @@ function sendRequest(query) {
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.type === 'log') {
-          console.log.apply(console, request.data);
+          console.log(request.data);
         } else if (request.type === 'voice') {
           sendRequest(request.data);
         }

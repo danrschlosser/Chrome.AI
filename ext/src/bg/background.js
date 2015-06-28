@@ -98,16 +98,17 @@ var onRecord = function (e) {
     resetIcon();
     if (isRecording) {
         log('Start recording');
-        recognition.start();
+        pendingIntents = [];
         chrome.contextMenus.update('record', {
             'title': 'Stop Recording'
         });
+        recognition.start();
     } else {
         log('Stop recording');
-        recognition.stop();
         chrome.contextMenus.update('record', {
             'title': 'Start Recording'
         });
+        recognition.stop();
     }
 };
 
