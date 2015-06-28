@@ -3,7 +3,8 @@ jQuery.fn.getSelector = function () {
     if (this.length != 1) throw 'Requires one element.';
     var path, node = this;
     if (node[0].id) return '#' + node[0].id;
-    if (node[0].href && node[0].href != '#') return node[0].tagName + '[href="' + node[0].href + '"]';
+    var href = node[0].attr('href');
+    if (href && href != '#') return node[0].tagName + '[href*="' + href + '"]';
     while (node.length) {
         var realNode = node[0], name = realNode.localName;
         if (!name) break;
