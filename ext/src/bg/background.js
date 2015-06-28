@@ -47,7 +47,6 @@ recognition.onresult = function (event) {
     console.log('got expression', expression);
 
     if (isRecording) {
-        log("Server obj:", intentObj);
 
         if (pendingIntents.length > 0 && expression && expression !== '') {
             var intentObj = {
@@ -55,6 +54,8 @@ recognition.onresult = function (event) {
                 expression: expression,
                 confidence: confidence
             };
+
+            log("Server obj:", intentObj);
 
             $.ajax({
                 type: 'POST',
