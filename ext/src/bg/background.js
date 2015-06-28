@@ -52,7 +52,8 @@ recognition.onresult = function (event) {
             var intentObj = {
                 intents: pendingIntents,
                 expression: expression,
-                confidence: confidence
+                confidence: confidence,
+                context: pendingIntents[0].context
             };
 
             log("Server obj:", intentObj);

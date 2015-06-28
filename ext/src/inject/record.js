@@ -34,6 +34,9 @@ $('a, button, input, select, textarea').click(function(e) {
 			data: {
 				selector: path,
 				innerText: e.target.innerText
+			},
+			context: {
+				domain: window.location.host
 			}
 		}
 	}, function(response) {
